@@ -1,0 +1,97 @@
+# See https://github.com/nuxt/module-builder/blob/main/.github/workflows/ci.yml
+
+name: Release version
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  # pull_request:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+
+jobs:
+  ci:
+    environment: ${{ github.ref_name }}
+    env:
+      # API_BASE_URL: ${{ vars.API_BASE_URL }}
+      BASE_URL: ${{ vars.BASE_URL }}
+      BRANCH_NAME: ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    container:
+      image: catthehacker/ubuntu:js-latest
+      options: -p 6666:3000
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: corepack enable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+          # writes "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" to /tmp/.npmrc
+          registry-url: "https://npm.pkg.github.com"
+
+          # FIXME: ends up in "yarn cache is not found"
+          # cache: "yarn"
+
+      # - run: cat /tmp/.npmrc
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - run: yarn install
+        # if: steps.yarn-cache.outputs.cache-hit != 'true'
+      #  env:
+      #    # needed for installation of '@tricks-gmbh/*' npm packages
+      #    NODE_AUTH_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN_FOR_NPM_INSTALLS }}
+
+      - run: yarn dev:prepare
+
+      - run: |
+          git config user.name "$USERNAME"
+          git config user.email "$USERNAME@$ADDRESS_SUFFIX"
+        env:
+          USERNAME: ${{ github.actor }}
+          ADDRESS_SUFFIX: users.noreply.github.com
+
+      #- run: yarn lint
+
+      # - run: yarn fixture:base:generate
+      # - run: yarn fixture:i18n:generate
+
+      # - run: yarn fixture:i18n --host:0.0.0.0
+
+      #- run: yarn test --reporter=verbose --no-color --no-file-parallelism test/*.test.ts
+
+      #- run: yarn test --reporter=verbose --no-color --no-file-parallelism test/e2e/layers/basic
+
+      #- run: yarn test --reporter=verbose --no-color --no-file-parallelism test/e2e/layers/i18n
+        # if: ${{ env.ACT }}
+
+      # - run: yarn test --reporter=verbose --no-color --no-file-parallelism
+      #   if: ${{ !env.ACT }}
+
+      - run: yarn release
+        if: ${{ github.ref == 'refs/heads/main' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHANGELOGEN_TOKENS_GITHUB: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: yarn release:beta
+        if: ${{ github.ref == 'refs/heads/develop' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHANGELOGEN_TOKENS_GITHUB: ${{ secrets.GITHUB_TOKEN }}
