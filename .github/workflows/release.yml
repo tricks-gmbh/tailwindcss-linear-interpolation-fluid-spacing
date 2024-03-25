@@ -40,25 +40,25 @@ jobs:
 
       # - run: cat /tmp/.npmrc
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+     # - name: Get yarn cache directory path
+     #   id: yarn-cache-dir-path
+     #   run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
-      - uses: actions/cache@v4
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+     # - uses: actions/cache@v4
+     #   id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+     #   with:
+     #     path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+     #     key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+     #     restore-keys: |
+     #       ${{ runner.os }}-yarn-
 
-      - run: yarn install
+     # - run: yarn install
         # if: steps.yarn-cache.outputs.cache-hit != 'true'
       #  env:
       #    # needed for installation of '@tricks-gmbh/*' npm packages
       #    NODE_AUTH_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN_FOR_NPM_INSTALLS }}
 
-      - run: yarn dev:prepare
+     # - run: yarn dev:prepare
 
       - run: |
           git config user.name "$USERNAME"
@@ -84,13 +84,13 @@ jobs:
       # - run: yarn test --reporter=verbose --no-color --no-file-parallelism
       #   if: ${{ !env.ACT }}
 
-      - run: yarn release
+      - run: npm publish
         if: ${{ github.ref == 'refs/heads/main' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CHANGELOGEN_TOKENS_GITHUB: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: yarn release:beta
+      - run: npm publish --tag beta
         if: ${{ github.ref == 'refs/heads/develop' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
