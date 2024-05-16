@@ -50,9 +50,6 @@ const dynamicSpacing = plugin.withOptions(
           spacing: (theme) => {
             return spacing(theme('screens'))
           },
-          fontSize: (theme) => {
-            return spacing(theme('screens'))
-          },
         },
       },
     }
