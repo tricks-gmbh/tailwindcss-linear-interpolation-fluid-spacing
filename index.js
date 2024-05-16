@@ -50,9 +50,8 @@ const dynamicSpacing = plugin.withOptions(
     return {
       theme: {
         extend: {
-          spacing: () => {
-            return spacing()
-          },
+          spacing: (theme) => {
+            return spacing(theme('screens'))
         },
       },
     }
