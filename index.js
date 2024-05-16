@@ -9,8 +9,8 @@ const dynamicSpacing = plugin.withOptions(
   (options) => {
     const spacing = () => {
       const sizes = [
-        ...(options?.sizes ?? Object.keys(require('tailwindcss/defaultTheme').spacing)),
-        ...(options?.extend?.sizes ?? []),
+        ...Object.keys(require('tailwindcss/defaultTheme').spacing),
+        ...(Object.keys(require('./tailwind.config.js').theme.extend.spacing) ?? []),
       ]
         .filter((size) => Number(size) !== 0 && !isNaN(size))
         .map((size) => `${size}`)
@@ -24,20 +24,23 @@ const dynamicSpacing = plugin.withOptions(
       )
 
       const obj = {}
-      const xxs = 375
-      const xxxl = 1920
+      const mobileLayout = options?.mobileLayout || 375
+      const desktopLayout = options?.desktopLayout || 1920
+      const clampMax = options?.clampMax || 2560
 
       for (const [size, value] of Object.entries(values)) {
         for (const [size2, value2] of Object.entries(values)) {
           if (parseFloat(size2) <= parseFloat(size)) continue
-          const m = (value2 - value) / (xxxl - xxs)
-          let b = value - m * xxs
+          const m = (value2 - value) / (desktopLayout - mobileLayout)
+          let b = value - m * mobileLayout
           let sign = '+'
           if (b < 0) {
             sign = '-'
             b = Math.abs(b)
           }
-          obj[`vw-${size}-to-${size2}`] = `calc(${m * 100}vw ${sign} ${b / 16}rem)`
+          obj[`vw-${size}-to-${size2}`] = `clamp(${size / 4}rem, calc(${m * 100}vw ${sign} ${
+            b / 16
+          }rem), ${(m * clampMax + b) / 16}rem)`
         }
       }
 
@@ -47,8 +50,8 @@ const dynamicSpacing = plugin.withOptions(
     return {
       theme: {
         extend: {
-          spacing: (theme) => {
-            return spacing(theme('screens'))
+          spacing: () => {
+            return spacing()
           },
         },
       },
