@@ -10,7 +10,7 @@ const dynamicSpacing = plugin.withOptions(
     const spacing = () => {
       const sizes = [
         ...Object.keys(require('tailwindcss/defaultTheme').spacing),
-        ...(Object.keys(require('../../../tailwind.config.js').theme.extend.spacing) ?? []),
+        ...(Object.keys(require('../../../tailwind.config.js').default.theme.extend.spacing) ?? []),
       ]
         .filter((size) => Number(size) !== 0 && !isNaN(size))
         .map((size) => `${size}`)
