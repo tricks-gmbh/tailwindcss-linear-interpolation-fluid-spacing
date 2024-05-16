@@ -4,7 +4,7 @@
     "type": "git",
     "url": "git+https://github.com/tricks-gmbh/tailwindcss-linear-interpolation-fluid-spacing.git"
   },
-  "version": "0.2.1",
+  "version": "0.2.0",
   "description": "A Tailwind CSS plugin that provides linear interpolated fluid-responsive spacings between two viewport widths.",
   "main": "index.js",
   "license": "MIT",
