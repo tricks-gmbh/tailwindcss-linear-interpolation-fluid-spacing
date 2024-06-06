@@ -34,13 +34,15 @@ const dynamicSpacing = plugin.withOptions(
           const m = (value2 - value) / (desktopLayout - mobileLayout)
           let b = value - m * mobileLayout
           let sign = '+'
+          let clampMaxCalculated = (m * clampMax + b) / 16
           if (b < 0) {
             sign = '-'
             b = Math.abs(b)
+            clampMaxCalculated = (m * clampMax - b) / 16
           }
           obj[`vw-${size}-to-${size2}`] = `clamp(${size / 4}rem, calc(${m * 100}vw ${sign} ${
             b / 16
-          }rem), ${(m * clampMax + b) / 16}rem)`
+          }rem), ${clampMaxCalculated}rem)`
         }
       }
 
